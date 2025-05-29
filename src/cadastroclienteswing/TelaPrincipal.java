@@ -136,6 +136,10 @@ public class TelaPrincipal extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Existem campos a serem preenchidos", "ATENÇÃO",JOptionPane.WARNING_MESSAGE);
             return;
         }
+        if(isClienteCadastrado(cpf)){
+            JOptionPane.showMessageDialog(null, "O cliente já se encontra cadastrado!", "ATENÇÃO", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
         modelo.addRow(new Object[]{nome, cpf});
         
         JOptionPane.showMessageDialog(null, "Cliente cadastrado com sucesso!", "SUCESSO",JOptionPane.INFORMATION_MESSAGE);
@@ -204,5 +208,15 @@ public class TelaPrincipal extends javax.swing.JFrame {
         modelo.addColumn("CPF");
         
         clientsTable.setModel(modelo);
+    }
+
+    private boolean isClienteCadastrado(String cpf) {
+        for (int i = 0; i < modelo.getRowCount(); i++){
+            String cpfCadastrado = (String) modelo.getValueAt(i, 1);
+            if(cpf.replaceAll("[0-9]", "").equals(cpfCadastrado.replaceAll("[0-9]", ""))){
+                return true;
+            }
+        }
+        return false;
     }
 }
