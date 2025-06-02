@@ -4,6 +4,9 @@
  */
 package cadastroclienteswing;
 
+import javaapplication1.dao.IClienteDAO;
+import javaapplication1.dao.ClienteMapDAO;
+import javaapplication1.domain.Cliente;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -13,6 +16,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class TelaPrincipal extends javax.swing.JFrame {
     private DefaultTableModel modelo = new DefaultTableModel();
+    private IClienteDAO clienteDAO = new ClienteMapDAO();
     /**
      * Creates new form TelaPrincipal
      */
@@ -136,15 +140,24 @@ public class TelaPrincipal extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Existem campos a serem preenchidos", "ATENÇÃO",JOptionPane.WARNING_MESSAGE);
             return;
         }
+        
         if(isClienteCadastrado(cpf)){
             JOptionPane.showMessageDialog(null, "O cliente já se encontra cadastrado!", "ATENÇÃO", JOptionPane.INFORMATION_MESSAGE);
             return;
-        }
-        modelo.addRow(new Object[]{nome, cpf});
+}
         
-        JOptionPane.showMessageDialog(null, "Cliente cadastrado com sucesso!", "SUCESSO",JOptionPane.INFORMATION_MESSAGE);
-        txtNome.setText("");
-        txtCpf.setText("");
+        Cliente cliente = new Cliente(nome, cpf, cpf, null, cpf, null, null);
+        Boolean isCadastrado = this.clienteDAO.cadastrar(cliente);
+        
+        if (isCadastrado) {
+           modelo.addRow(new Object[]{cliente.getNome(), cliente.getCpf()});
+           limparCampos();
+           JOptionPane.showMessageDialog(null, "Cliente cadastrado com sucesso!");
+        } else {
+            JOptionPane.showMessageDialog(null, "Erro ao cadastrar cliente!", "ERRO", JOptionPane.ERROR_MESSAGE);
+        }
+
+
     }//GEN-LAST:event_btnSalvarActionPerformed
 
     /**
@@ -211,12 +224,27 @@ public class TelaPrincipal extends javax.swing.JFrame {
     }
 
     private boolean isClienteCadastrado(String cpf) {
-        for (int i = 0; i < modelo.getRowCount(); i++){
-            String cpfCadastrado = (String) modelo.getValueAt(i, 1);
-            if(cpf.replaceAll("[0-9]", "").equals(cpfCadastrado.replaceAll("[0-9]", ""))){
+        try {
+            Long cpfLong = Long.parseLong(cpf);
+            Cliente cliente = clienteDAO.consultar(cpfLong);
+            if (cliente != null){
                 return true;
             }
+            
+            for (int i = 0; i < modelo.getRowCount(); i++){
+                String cpfCadastrado = (String) modelo.getValueAt(i, 1);
+                if (cpf.equals(cpfCadastrado)){
+                    return true;
+                }
+            }
+        } catch (NumberFormatException e){
+            return false;
         }
         return false;
     }
+    
+    private void limparCampos() {
+    txtNome.setText("");
+    txtCpf.setText("");
+}
 }

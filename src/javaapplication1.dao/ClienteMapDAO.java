@@ -5,11 +5,10 @@
  */
 package javaapplication1.dao;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import javaapplication1.domain.Cliente;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -17,15 +16,15 @@ import javax.swing.JOptionPane;
  */
 public class ClienteMapDAO implements IClienteDAO {
     
-    private Map<Long, Cliente> map;
+    private final Map<Long, Cliente> map;
     
     public ClienteMapDAO() {
-        map = new TreeMap<>();
+        this.map = new TreeMap<>();
     }
 
     @Override
     public Boolean cadastrar(Cliente cliente) {
-        if (map.containsKey(cliente.getCpf())) {
+        if (cliente == null || map.containsKey(cliente.getCpf())) {
             return false;
         }
         
@@ -34,13 +33,17 @@ public class ClienteMapDAO implements IClienteDAO {
     }
 
     @Override
-    public void excluir(Long cpf) {
-        Cliente clienteCadastrado = map.get(cpf);
-        map.remove(clienteCadastrado.getCpf(), clienteCadastrado);
+    public Boolean excluir(Long cpf) {
+        Cliente clienteRemovido = map.remove(cpf);
+        return clienteRemovido != null;
     }
 
-    @Override
-    public void alterar(Cliente cliente) {
+    @Override    
+    public Boolean alterar(Cliente cliente) {
+        if (cliente == null || !map.containsKey(cliente.getCpf())) {
+            return false;
+        }
+        
         Cliente clienteCadastrado = map.get(cliente.getCpf());
         clienteCadastrado.setNome(cliente.getNome());
         clienteCadastrado.setTel(cliente.getTel());
@@ -48,11 +51,18 @@ public class ClienteMapDAO implements IClienteDAO {
         clienteCadastrado.setEnd(cliente.getEnd());
         clienteCadastrado.setCidade(cliente.getCidade());
         clienteCadastrado.setEstado(cliente.getEstado());
+        
+        return true;
     }
 
     @Override
     public Cliente consultar(Long cpf) {
         return this.map.get(cpf);
+    }
+    
+    @Override
+    public Collection<Cliente> buscarTodos(){
+        return map.values();
     }
     
 }

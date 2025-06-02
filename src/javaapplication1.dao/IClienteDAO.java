@@ -5,6 +5,7 @@
  */
 package javaapplication1.dao;
 
+import java.util.Collection;
 import javaapplication1.domain.Cliente;
 
 /**
@@ -13,11 +14,13 @@ import javaapplication1.domain.Cliente;
  */
 public interface IClienteDAO {
     
-    public Boolean cadastrar(Cliente cliente);
+    Boolean cadastrar(Cliente cliente);
     
-    public void excluir(Long cpf);
+    Boolean excluir(Long cpf);
     
-    public void alterar(Cliente cliente);
+    Boolean alterar(Cliente cliente);
     
-    public Cliente consultar(Long cpf);
+    Cliente consultar(Long cpf);
+    
+    Collection<Cliente> buscarTodos();
 }
