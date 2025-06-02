@@ -229,32 +229,36 @@ public class TelaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_btnExcluirActionPerformed
 
     private void btnAtualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAtualizarActionPerformed
-        int linhaSelecionada = tabelaClientes.getSelectedRow();
-    
+                                           
+    int linhaSelecionada = tabelaClientes.getSelectedRow();
+
     if (linhaSelecionada < 0) {
         JOptionPane.showMessageDialog(this, "Nenhum cliente selecionado.", "ERRO", JOptionPane.INFORMATION_MESSAGE);
         return;
     }
-    
+
     try {
         Long cpfOriginal = (Long) tabelaClientes.getValueAt(linhaSelecionada, 1);
         String novoNome = txtNome.getText();
         String novoCpf = txtCpf.getText();
-        
+
         if (!isCamposValidos(novoNome, novoCpf)) {
             JOptionPane.showMessageDialog(this, "Existem campos a serem preenchidos", "ATENÇÃO", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
         // Verifica se está tentando alterar o CPF
         if (!cpfOriginal.toString().equals(novoCpf)) {
+            // Restaura o CPF original no campo de texto
+            txtCpf.setText(cpfOriginal.toString());
+            
             JOptionPane.showMessageDialog(this, 
                 "Não é possível alterar o CPF.\nPara cadastrar com um novo CPF, exclua este cliente e crie um novo.", 
                 "Alteração não permitida", 
                 JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
         // Cria o cliente com os dados atualizados (mantendo o CPF original)
         Cliente clienteAtualizado = new Cliente(novoNome, 
                                               cpfOriginal.toString(), // Mantém o CPF original
@@ -263,9 +267,9 @@ public class TelaPrincipal extends javax.swing.JFrame {
                                               null, 
                                               null, 
                                               null);
-        
+
         boolean atualizado = clienteDAO.alterar(clienteAtualizado);
-        
+
         if (atualizado) {
             modelo.setValueAt(clienteAtualizado.getNome(), linhaSelecionada, 0);
             // Não alteramos o CPF na tabela pois ele permanece o mesmo
