@@ -42,6 +42,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         tabelaClientes = new javax.swing.JTable();
         btnExcluir = new javax.swing.JButton();
+        btnAtualizar = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItemSair = new javax.swing.JMenuItem();
@@ -84,6 +85,13 @@ public class TelaPrincipal extends javax.swing.JFrame {
             }
         });
 
+        btnAtualizar.setText("Atualizar");
+        btnAtualizar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAtualizarActionPerformed(evt);
+            }
+        });
+
         jMenu1.setText("Opções");
 
         jMenuItemSair.setText("Sair");
@@ -108,7 +116,9 @@ public class TelaPrincipal extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnSalvar)
                         .addGap(18, 18, 18)
-                        .addComponent(btnExcluir))
+                        .addComponent(btnExcluir)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnAtualizar))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lblNome)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -132,7 +142,8 @@ public class TelaPrincipal extends javax.swing.JFrame {
                 .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnSalvar)
-                    .addComponent(btnExcluir))
+                    .addComponent(btnExcluir)
+                    .addComponent(btnAtualizar))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(63, Short.MAX_VALUE))
@@ -159,7 +170,14 @@ public class TelaPrincipal extends javax.swing.JFrame {
             return;
         }
         
-        if(isClienteCadastrado(cpf)){
+        String cpfNumeros = cpf.replaceAll("[^0-9]", "");
+        
+        if(cpfNumeros.length() != 11) {
+        JOptionPane.showMessageDialog(null, "CPF deve ter 11 dígitos", "Erro", JOptionPane.ERROR_MESSAGE);
+        return;
+        }
+        
+        if(isClienteCadastrado(cpfNumeros)){
             JOptionPane.showMessageDialog(null, "O cliente já se encontra cadastrado!", "ATENÇÃO", JOptionPane.INFORMATION_MESSAGE);
             return;
 }
@@ -210,6 +228,57 @@ public class TelaPrincipal extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnExcluirActionPerformed
 
+    private void btnAtualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAtualizarActionPerformed
+        int linhaSelecionada = tabelaClientes.getSelectedRow();
+    
+    if (linhaSelecionada < 0) {
+        JOptionPane.showMessageDialog(this, "Nenhum cliente selecionado.", "ERRO", JOptionPane.INFORMATION_MESSAGE);
+        return;
+    }
+    
+    try {
+        Long cpfOriginal = (Long) tabelaClientes.getValueAt(linhaSelecionada, 1);
+        String novoNome = txtNome.getText();
+        String novoCpf = txtCpf.getText();
+        
+        if (!isCamposValidos(novoNome, novoCpf)) {
+            JOptionPane.showMessageDialog(this, "Existem campos a serem preenchidos", "ATENÇÃO", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Verifica se está tentando alterar o CPF
+        if (!cpfOriginal.toString().equals(novoCpf)) {
+            JOptionPane.showMessageDialog(this, 
+                "Não é possível alterar o CPF.\nPara cadastrar com um novo CPF, exclua este cliente e crie um novo.", 
+                "Alteração não permitida", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Cria o cliente com os dados atualizados (mantendo o CPF original)
+        Cliente clienteAtualizado = new Cliente(novoNome, 
+                                              cpfOriginal.toString(), // Mantém o CPF original
+                                              null, 
+                                              null, 
+                                              null, 
+                                              null, 
+                                              null);
+        
+        boolean atualizado = clienteDAO.alterar(clienteAtualizado);
+        
+        if (atualizado) {
+            modelo.setValueAt(clienteAtualizado.getNome(), linhaSelecionada, 0);
+            // Não alteramos o CPF na tabela pois ele permanece o mesmo
+            JOptionPane.showMessageDialog(this, "Cliente atualizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            limparCampos();
+        } else {
+            JOptionPane.showMessageDialog(this, "Erro ao atualizar cliente", "ERRO", JOptionPane.ERROR_MESSAGE);
+        }
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Erro ao atualizar cliente: " + e.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
+    }
+    }//GEN-LAST:event_btnAtualizarActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -246,6 +315,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAtualizar;
     private javax.swing.JButton btnExcluir;
     private javax.swing.JButton btnSalvar;
     private javax.swing.JMenu jMenu1;
